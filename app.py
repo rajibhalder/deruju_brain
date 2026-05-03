@@ -161,9 +161,10 @@ def main():
         life = signal_store.save(signal)
 
         logger.info(
-        f"TREND={life['trend_direction']} "
-        f"NOVELTY={life['novelty_score']} "
-        f"MOMENTUM={life['momentum_score']}"
+            f"TREND={life['trend_direction']} "
+            f"NOVELTY={life['novelty_score']} "
+            f"MOMENTUM={life['momentum_score']} "
+            f"RANK={life['rank_score']}"
         )
 
         shown += 1

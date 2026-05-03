@@ -7,6 +7,7 @@ import uuid
 class SignalDoc:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = field(default_factory=datetime.utcnow)
+    rank_score: float = 0.0
 
     category: str = ""
     title: str = ""
@@ -54,5 +55,6 @@ class SignalDoc:
             "status": self.status,
             "trend_direction": self.trend_direction,
             "momentum_score": self.momentum_score,
-            "novelty_score": self.novelty_score
+            "novelty_score": self.novelty_score,
+            "rank_score": self.rank_score,
         }

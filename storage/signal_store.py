@@ -22,6 +22,23 @@ def make_signature(signal_doc):
         text.encode("utf-8")
     ).hexdigest()
 
+def calculate_rank_score(
+	importance,
+	confidence,
+	momentum_score,
+	novelty_score
+	):
+	importance_score = importance * 10
+	confidence_score = confidence * 100
+
+	score = (
+		0.35 * importance_score
+		+ 0.25 * confidence_score
+		+ 0.20 * momentum_score
+		+ 0.20 * novelty_score
+	)
+
+	return round(score, 1)
 
 class SignalStore:
     def __init__(self):
@@ -53,6 +70,14 @@ class SignalStore:
                 seen_count * 12
             )
 
+            rank_score = calculate_rank_score(
+                signal_doc.importance,
+                signal_doc.confidence,
+                momentum_score,
+                novelty_score
+            )
+
+
             trend_direction = (
                 "RISING"
                 if seen_count >= 3
@@ -81,7 +106,8 @@ class SignalStore:
                     "novelty_score": novelty_score,
                     "momentum_score": momentum_score,
                     "trend_direction": trend_direction,
-                    "status": status
+                    "status": status,
+                    "rank_score": rank_score
                 }
                 }
             )
@@ -94,7 +120,8 @@ class SignalStore:
                 "trend_direction": trend_direction,
                 "novelty_score": novelty_score,
                 "momentum_score": momentum_score,
-                "status": status
+                "status": status,
+                "rank_score": rank_score
             }
 
         else:
@@ -106,6 +133,12 @@ class SignalStore:
             doc["seen_count"] = 1
             doc["novelty_score"] = 100
             doc["momentum_score"] = 10
+            doc["rank_score"] = calculate_rank_score(
+                signal_doc.importance,
+                signal_doc.confidence,
+                10,
+                100
+            )
             doc["trend_direction"] = "NEW"
             doc["status"] = "NEW"
 
@@ -119,5 +152,6 @@ class SignalStore:
                 "trend_direction": "NEW",
                 "novelty_score": 100,
                 "momentum_score": 10,
-                "status": "NEW"
+                "status": "NEW",
+                "rank_score": doc["rank_score"]
             }
