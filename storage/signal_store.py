@@ -8,28 +8,33 @@ from logger import logger
 
 
 def make_signature(signal_doc):
-    text = (
-    signal_doc.category
-    + "|"
-    + signal_doc.title
-    + "|"
-    + ",".join(
-    sorted(signal_doc.affected_entities[:5])
-    )
-    )
+	entities = sorted(
+	[
+	x.strip().lower()
+	for x in signal_doc.affected_entities[:8]
+	if x
+	]
+	)
 
-    return hashlib.sha256(
-        text.encode("utf-8")
-    ).hexdigest()
+	text = (
+		signal_doc.category.lower()
+		+ "|"
+		+ "|".join(entities)
+	)
+
+	return hashlib.sha256(
+		text.encode("utf-8")
+	).hexdigest()
 
 def calculate_rank_score(
-	importance,
-	confidence,
-	momentum_score,
-	novelty_score
-	):
+    importance,
+    confidence,
+    momentum_score,
+    novelty_score
+    ):
 	importance_score = importance * 10
 	confidence_score = confidence * 100
+
 
 	score = (
 		0.35 * importance_score
@@ -42,7 +47,13 @@ def calculate_rank_score(
 
 class SignalStore:
     def __init__(self):
-        self.client = MongoClient(Config.MONGO_URI)
+        self.client = MongoClient(
+        Config.MONGO_URI,
+        serverSelectionTimeoutMS=5000
+        )
+
+        self.client.admin.command("ping")
+
         self.db = self.client[Config.MONGO_DB]
         self.collection = self.db["premium_signals"]
 

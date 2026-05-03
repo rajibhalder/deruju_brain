@@ -5,6 +5,7 @@ from pipeline.signal_builder import build_signal
 from services.entity_cleaner import top_entities
 from services.cluster_reasoner import ClusterReasoner
 from storage.signal_store import SignalStore
+from services.premium_filter import is_premium
 
 ALLOWED_CATEGORIES = {
     "Geopolitical Conflict",
@@ -25,6 +26,22 @@ ALLOWED_CATEGORIES = {
     "Health & Public Safety"
 }
 
+def normalize_urgency(v):
+        if not v:
+            return "MEDIUM"
+        
+        v = v.strip().lower()
+
+        if v in ["critical", "urgent"]:
+            return "CRITICAL"
+
+        if v in ["high"]:
+            return "HIGH"
+
+        if v in ["medium", "moderate"]:
+            return "MEDIUM"
+
+        return "LOW"
 
 def normalize_category(category: str):
     if not category:
@@ -142,7 +159,19 @@ def main():
             reasoning
         )
 
-        signal.category = normalize_category(signal.category)
+        signal.urgency = normalize_urgency(
+            signal.urgency
+        )
+
+        signal.category = normalize_category(
+            signal.category
+        )
+
+        if not is_premium(signal):
+            logger.info(
+            f"filtered non-premium: {signal.title}"
+            )
+            continue
 
         if signal.category not in ALLOWED_CATEGORIES:
             logger.info(f"skipping category={signal.category}")
