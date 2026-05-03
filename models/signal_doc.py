@@ -40,6 +40,7 @@ class SignalDoc:
     risk_score: int = 0
     watch_tags: list = field(default_factory=list)
     affected_sectors: list = field(default_factory=list)
+    evidence: list = field(default_factory=list)
 
     def to_dict(self):
         return {
@@ -72,4 +73,5 @@ class SignalDoc:
             "risk_score": self.risk_score,
             "watch_tags": self.watch_tags,
             "affected_sectors": self.affected_sectors,
+            "evidence": self.evidence,
         }
