@@ -158,7 +158,13 @@ def main():
         logger.info(f"ACTIONS: {signal.action_ideas}")
 
         signal.source_cluster_size = cluster.size
-        signal_store.save(signal)
+        life = signal_store.save(signal)
+
+        logger.info(
+        f"TREND={life['trend_direction']} "
+        f"NOVELTY={life['novelty_score']} "
+        f"MOMENTUM={life['momentum_score']}"
+        )
 
         shown += 1
 

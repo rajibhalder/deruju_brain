@@ -27,6 +27,9 @@ class SignalDoc:
     first_seen_at: datetime = field(default_factory=datetime.utcnow)
     last_seen_at: datetime = field(default_factory=datetime.utcnow)
     seen_count: int = 1
+    trend_direction: str = "NEW"
+    momentum_score: float = 0.0
+    novelty_score: float = 100.0
     status: str = "NEW"
 
     def to_dict(self):
@@ -48,5 +51,8 @@ class SignalDoc:
             "first_seen_at": self.first_seen_at,
             "last_seen_at": self.last_seen_at,
             "seen_count": self.seen_count,
-            "status": self.status
+            "status": self.status,
+            "trend_direction": self.trend_direction,
+            "momentum_score": self.momentum_score,
+            "novelty_score": self.novelty_score
         }
