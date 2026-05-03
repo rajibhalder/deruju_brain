@@ -1,8 +1,9 @@
 import hashlib
 import json
 import re
-import requests
+from datetime import datetime
 
+import requests
 from pymongo import MongoClient
 
 from config import Config
@@ -10,7 +11,13 @@ from logger import logger
 
 class ClusterReasoner:
     def __init__(self):
-        self.client = MongoClient(Config.MONGO_URI)
+        self.client = MongoClient(
+            Config.MONGO_URI,
+            serverSelectionTimeoutMS=5000
+        )
+
+        self.client.admin.command("ping")
+
         self.db = self.client[Config.MONGO_DB]
         self.cache = self.db["brain_cache"]
 
@@ -47,7 +54,11 @@ class ClusterReasoner:
 
         return json.loads(content)
 
-    def _make_cluster_hash(self, titles, top_entities):
+    def _make_cluster_hash(
+        self,
+        titles,
+        top_entities
+    ):
         raw = (
             "|".join(sorted(titles[:10]))
             + "|"
@@ -65,7 +76,7 @@ class ClusterReasoner:
             if a.title
         ]
 
-        cluster_hash = self._make_cluster_hash(
+        cluster_hash = "v2_" + self._make_cluster_hash(
             titles,
             top_entities
         )
@@ -76,38 +87,44 @@ class ClusterReasoner:
 
         if cached:
             logger.info(
-                f"brain cache hit={cluster_hash[:8]}"
+                f"brain cache hit={cluster_hash[:11]}"
             )
             return cached["reasoning"]
 
         prompt = f"""
-    `
+        
+        You are an expert intelligence analyst.
 
-    You are an expert intelligence analyst.
+        Analyze this news cluster.
 
-    Analyze this news cluster.
+        Cluster size: {cluster.size}
 
-    Cluster size: {cluster.size}
+        Titles:
+        {json.dumps(titles, indent=2)}
 
-    Titles:
-    {json.dumps(titles, indent=2)}
+        Top entities:
+        {json.dumps(top_entities, indent=2)}
 
-    Top entities:
-    {json.dumps(top_entities, indent=2)}
+        Return ONLY valid JSON.
 
-    Return ONLY JSON.
-
-    {{
-    "category": "",
-    "theme": "",
-    "signal_type": "",
-    "importance": 0,
-    "confidence": 0.0,
-    "impact_window": "",
-    "why_it_matters": "",
-    "action_ideas": []
-    }}
-    """
+        {{
+        "category": "",
+        "theme": "",
+        "signal_type": "",
+        "importance": 0,
+        "confidence": 0.0,
+        "impact_window": "",
+        "why_it_matters": "",
+        "action_ideas": [],
+        "urgency": "",
+        "india_relevance": 0,
+        "market_impact": "",
+        "opportunity_score": 0,
+        "risk_score": 0,
+        "watch_tags": [],
+        "affected_sectors": []
+        }}
+        """
 
 
         payload = {
@@ -125,10 +142,10 @@ class ClusterReasoner:
         }
 
         headers = {
-            "Authorization": (
-                f"Bearer {Config.DEEPSEEK_API_KEY}"
-            ),
-            "Content-Type": "application/json"
+            "Authorization":
+                f"Bearer {Config.DEEPSEEK_API_KEY}",
+            "Content-Type":
+                "application/json"
         }
 
         try:
@@ -145,15 +162,18 @@ class ClusterReasoner:
                 "choices"
             ][0]["message"]["content"]
 
-            reasoning = self._extract_json(content)
+            reasoning = self._extract_json(
+                content
+            )
 
             self.cache.insert_one({
                 "_id": cluster_hash,
-                "reasoning": reasoning
+                "reasoning": reasoning,
+                "created_at": datetime.utcnow()
             })
 
             logger.info(
-                f"brain cache saved={cluster_hash[:8]}"
+                f"brain cache saved={cluster_hash[:11]}"
             )
 
             return reasoning
@@ -174,5 +194,12 @@ class ClusterReasoner:
                     "Unable to classify automatically.",
                 "action_ideas": [
                     "Monitor developments"
-                ]
+                ],
+                "urgency": "MEDIUM",
+                "india_relevance": 5,
+                "market_impact": "",
+                "opportunity_score": 30,
+                "risk_score": 30,
+                "watch_tags": [],
+                "affected_sectors": []
             }

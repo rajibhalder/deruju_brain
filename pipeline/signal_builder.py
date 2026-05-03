@@ -15,5 +15,12 @@ def build_signal(cluster, top_entities, reasoning):
             tags=top_entities[:5],
             action_ideas=reasoning.get("action_ideas", []),
             source_cluster_size=cluster.size,
-            why_it_matters=reasoning.get("why_it_matters", "")
+            why_it_matters=reasoning.get("why_it_matters", ""),
+            urgency=reasoning.get("urgency", "MEDIUM"),
+            india_relevance=reasoning.get("india_relevance", 5),
+            market_impact=reasoning.get("market_impact", ""),
+            opportunity_score=reasoning.get("opportunity_score", 0),
+            risk_score=reasoning.get("risk_score", 0),
+            watch_tags=reasoning.get("watch_tags", []),
+            affected_sectors=reasoning.get("affected_sectors", []),
         )

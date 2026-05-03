@@ -33,6 +33,14 @@ class SignalDoc:
     novelty_score: float = 100.0
     status: str = "NEW"
 
+    urgency: str = "MEDIUM"
+    india_relevance: int = 5
+    market_impact: str = ""
+    opportunity_score: int = 0
+    risk_score: int = 0
+    watch_tags: list = field(default_factory=list)
+    affected_sectors: list = field(default_factory=list)
+
     def to_dict(self):
         return {
             "_id": self.id,
@@ -57,4 +65,11 @@ class SignalDoc:
             "momentum_score": self.momentum_score,
             "novelty_score": self.novelty_score,
             "rank_score": self.rank_score,
+            "urgency": self.urgency,
+            "india_relevance": self.india_relevance,
+            "market_impact": self.market_impact,
+            "opportunity_score": self.opportunity_score,
+            "risk_score": self.risk_score,
+            "watch_tags": self.watch_tags,
+            "affected_sectors": self.affected_sectors,
         }

@@ -166,6 +166,11 @@ def main():
             f"MOMENTUM={life['momentum_score']} "
             f"RANK={life['rank_score']}"
         )
+        logger.info(f"URGENCY={signal.urgency}")
+        logger.info(f"INDIA_RELEVANCE={signal.india_relevance}")
+        logger.info(f"RISK={signal.risk_score}")
+        logger.info(f"OPPORTUNITY={signal.opportunity_score}")
+        logger.info(f"SECTORS={signal.affected_sectors}")
 
         shown += 1
 
