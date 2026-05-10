@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  deruju-brain-scheduler:
+    image: rajibhalder/deruju_brain:latest
+
+    command:
+      - python
+      - scheduler.py
+
+    volumes:
+      - shared-data:/shared
+      - /root/dockercompose/fullchain.pem:/app/certs/fullchain.pem:ro
+
+    networks:
+      - deruju-net
+
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+    logging:
+      driver: json-file
+
+networks:
+  deruju-net:
+    external: true
+
+volumes:
+  shared-data:
+    driver: local
